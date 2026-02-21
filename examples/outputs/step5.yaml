@@ -1,0 +1,24 @@
+step: "5"
+schema_version: "2.2"
+lint_report:
+  coverage_ratio: 1.0
+  uncovered_inputs: []
+  root_router_present_ok: true
+  global_master_router_count_ok: true
+  toolkits_sub_skills_limit_ok: true
+  misc_toolkit_limit_ok: true
+  no_nested_master_ok: true
+  yaml_parseable_ok: true
+  yaml_safe_profile_ok: true
+  type_system_valid_ok: true
+  dependency_graph_acyclic_ok: true
+  cycle_fallback_present_ok: true
+  concurrency_safe_ok: true
+  idempotency_policy_ok: true
+  observability_trace_context_ok: true
+  security_redaction_rules_declared_ok: true
+  security_redaction_delegation_ok: true
+violations: []
+auto_repairs_applied: []
+notes: |
+  All ok

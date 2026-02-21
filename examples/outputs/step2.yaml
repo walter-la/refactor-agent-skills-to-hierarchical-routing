@@ -1,0 +1,29 @@
+step: "2"
+schema_version: "2.2"
+migration_mapping:
+  - old_path: "examples/inputs/dummy1.md"
+    new_path: "dummy-toolkit/sub_skills/dummy1.md"
+    new_skill_id: "dummy1"
+    rename_reason: ""
+    coverage:
+      supersedes: ["examples/inputs/dummy1.md"]
+      split_into: []
+  - old_path: "examples/inputs/dummy2.md"
+    new_path: "dummy-toolkit/sub_skills/dummy2.md"
+    new_skill_id: "dummy2"
+    rename_reason: ""
+    coverage:
+      supersedes: ["examples/inputs/dummy2.md"]
+      split_into: []
+  - old_path: "examples/inputs/dummy3.md"
+    new_path: "misc-toolkit/sub_skills/dummy3.md"
+    new_skill_id: "dummy3"
+    rename_reason: ""
+    coverage:
+      supersedes: ["examples/inputs/dummy3.md"]
+      split_into: []
+coverage_report:
+  total_input_skills: 3
+  total_mapped_input_skills: 3
+  uncovered_inputs: []
+  coverage_ratio: 1.0

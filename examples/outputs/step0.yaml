@@ -1,0 +1,25 @@
+step: "0"
+schema_version: "2.2"
+warnings: []
+auto_fixes: []
+input_inventory:
+  total_input_skills: 3
+  input_skills:
+    - old_path: "examples/inputs/dummy1.md"
+      detected_name: "dummy_skill_1"
+      detected_description: "Does something simple."
+      io_inferred: true
+      reserved_name_conflict: false
+      confidence: "high"
+    - old_path: "examples/inputs/dummy2.md"
+      detected_name: "dummy_skill_2"
+      detected_description: "Another simple dummy."
+      io_inferred: true
+      reserved_name_conflict: false
+      confidence: "high"
+    - old_path: "examples/inputs/dummy3.md"
+      detected_name: "dummy_skill_3"
+      detected_description: "Third dummy."
+      io_inferred: true
+      reserved_name_conflict: false
+      confidence: "high"

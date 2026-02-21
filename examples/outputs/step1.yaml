@@ -1,0 +1,22 @@
+step: "1"
+schema_version: "2.2"
+target_toolkits_range: "2-4"
+actual_toolkits_count: 2
+root_router:
+  name: "root-router"
+  purpose: "global_intent_routing_and_cross_toolkit_pipelines"
+toolkits:
+  - toolkit: "dummy-toolkit"
+    verbs: ["do"]
+    objects: ["something"]
+    skills: 
+      - old_path: "examples/inputs/dummy1.md"
+      - old_path: "examples/inputs/dummy2.md"
+  - toolkit: "misc-toolkit"
+    verbs: ["miscellaneous"]
+    objects: ["stuff"]
+    skills:
+      - old_path: "examples/inputs/dummy3.md"
+constraints:
+  per_toolkit_skill_limit: 30
+  misc_skill_limit: 20
