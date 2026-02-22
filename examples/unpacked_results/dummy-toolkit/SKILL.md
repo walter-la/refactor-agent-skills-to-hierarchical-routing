@@ -53,4 +53,48 @@ sub_skills:
     mutex_group: "dummy1"
     sensitive_outputs: []
     path: "sub_skills/dummy1.md"
+  - id: "dummy2"
+    name: "Dummy 2"
+    description: "Another simple dummy"
+    when: "triggered"
+    execution_policy:
+      idempotent: true
+      max_retries_override: 2
+      requires_idempotency_key: false
+      compensating_action_path: ""
+    required_inputs:
+      - {name: "trace_context", schema: {type: "object", additionalProperties: true}}
+    required_permissions: []
+    outputs: []
+    depends_on: []
+    input_bindings: []
+    context_reads: []
+    context_writes: []
+    side_effects: []
+    resources_touched: []
+    mutex_group: "dummy2"
+    sensitive_outputs: []
+    path: "sub_skills/dummy2.md"
+  - id: "dummy3"
+    name: "Dummy 3"
+    description: "Third dummy"
+    when: "triggered"
+    execution_policy:
+      idempotent: true
+      max_retries_override: 2
+      requires_idempotency_key: false
+      compensating_action_path: ""
+    required_inputs:
+      - {name: "trace_context", schema: {type: "object", additionalProperties: true}}
+    required_permissions: []
+    outputs: []
+    depends_on: []
+    input_bindings: []
+    context_reads: []
+    context_writes: []
+    side_effects: []
+    resources_touched: []
+    mutex_group: "dummy3"
+    sensitive_outputs: []
+    path: "sub_skills/dummy3.md"
 ```
