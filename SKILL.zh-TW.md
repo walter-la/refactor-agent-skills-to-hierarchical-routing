@@ -22,7 +22,7 @@ schema_version: "2.2"
 - **高內聚優先 (Cohesion over Fragmentation)**：如果一組高度相關的技能（例如具有相同前綴或領域目的）總數在 30 個以內，應將其打包為單一 Toolkit。請勿為了硬湊數量而將其強行拆散。
 - 只有當整體技能庫跨度過大或總數過多時，才切分為 2–5 個 `<domain>-toolkit`。
 - 每 toolkit 子技能 ≤30；`misc-toolkit` ≤20。
-- 每個 `<domain>-toolkit` 必須包含一個 `SKILL.md` 檔案，作為該領域的路由進入點 (Routing Entry Point)。這個 YAML 內的 `description` 欄位至關重要，必須精準說明其包含之所有子技能的目的，以確保 Agent 能夠基於對話正確路由至該領域。
+- 每個 `<domain>-toolkit` 必須包含一個 `SKILL.md` 檔案，作為該領域的路由進入點 (Routing Entry Point)。這個 YAML 內的 `description` 欄位至關重要，必須精準說明其包含之所有子技能的目的，以確保 Agent 能夠基於對話正確路由至該領域。此外，其 Markdown 本文必須包含 `sub_skills` 子技能註冊表，以便 Agent 確切知道如何路由。
 
 ### 0.2 輸出格式與可驗證性
 - Step0–5 輸出皆為 **單一可解析 YAML**
@@ -301,6 +301,15 @@ toolkits_generated:
         DevOps 領域路由：型別校驗、DAG/循環防護、並行安全（含互斥治理）、冪等/重試/補償、可觀測性與安全遮蔽宣告。
       ---
       # DevOps Toolkit Router
+
+      ## 路由註冊表 (Available Sub-Skills)
+      Agent MUST 根據使用者的意圖，從以下註冊表選擇並路由至對應的子技能。
+      
+          sub_skills:
+            - id: "rollout_service"
+              name: "服務滾動部署"
+              path: "rollout_service/rollout_service.md"
+              description: "執行滾動部署指定服務，產出部署結果與摘要。"
 
       ## MUST：調度規則
       1) Security gate：缺權限/疑似注入 → 問 1 題澄清；requires_redaction 由 Host Interceptor 落實遮蔽。

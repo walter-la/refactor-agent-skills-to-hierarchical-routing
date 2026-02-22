@@ -22,7 +22,7 @@ schema_version: "2.2"
 - **Cohesion over Fragmentation**: If a cohesive domain (e.g., skills sharing a common prefix or purpose) contains ≤ 30 skills, group them into a SINGLE toolkit. Do NOT artificially split them just to create multiple toolkits.
 - If the entire skill inventory is large and diverse, produce 2–5 `<domain>-toolkit` toolkits.
 - Each toolkit MUST have ≤ 30 sub-skills; `misc-toolkit` ≤ 20.
-- Each `<domain>-toolkit` MUST contain a `SKILL.md` file that acts as the routing entry point for that domain. The `description` field in its YAML is CRITICAL and must accurately reflect the intent of all its sub-skills to ensure the Host Agent routes to it correctly.
+- Each `<domain>-toolkit` MUST contain a `SKILL.md` file that acts as the routing entry point for that domain. The `description` field in its YAML is CRITICAL and must accurately reflect the intent of all its sub-skills to ensure the Host Agent routes to it correctly. Furthermore, its markdown body MUST contain a `sub_skills` index registry so the Agent knows exactly where to route.
 
 ### 0.2 Output Format & Verifiability
 - Step0–5 outputs must each be **a single parseable YAML**
@@ -301,6 +301,15 @@ toolkits_generated:
         DevOps domain router: type validation, DAG/cycle protection, concurrency safety (incl. mutex governance), idempotency/retries/compensation, observability, and declarative security redaction.
       ---
       # DevOps Toolkit Router
+
+      ## Available Sub-Skills (Routing Registry)
+      You MUST route the user's intent to the appropriate sub-skill from the registry below.
+      
+          sub_skills:
+            - id: "rollout_service"
+              name: "Service Rolling Deployment"
+              path: "rollout_service/rollout_service.md"
+              description: "Execute a rolling deployment of the specified service, producing deployment results and a summary."
 
       ## MUST: Scheduling Rules
       1) Security gate: missing permissions/suspected injection → ask 1 clarification question; requires_redaction is enforced by the Host Interceptor.
