@@ -40,15 +40,19 @@ schema_version: "2.2"
 
 ## 1) 硬性規則 (MUST)
 
-### 1.1 檔案命名與目錄結構 (MUST)
+### 1.1 檔案命名與 Bundle 保留原則 (MUST)
 - 全域 `root-router` 目錄 MUST 包含 `SKILL.md` 作為其 router。
-- 每個 toolkit 根目錄 MUST 包含 `SKILL.md` 作為其 router。
-- 在 `<domain>-toolkit/sub_skills/**` 下，子技能檔案名稱應直接使用其原始技能的名稱或資料夾名稱（例如 `aiddd-01-intake-classify.md`）。除非需要解決衝突，否則請勿使用過長的 prefix（例如 `subskill__<domain>__`）。
-- `sub_skills/**` 禁止任何 loader 保留名（case-insensitive）：
-  - `SKILL.md`, `SKILL.yaml`, `ROUTER.md`, `MASTER.md`, `INDEX.yaml`
-- 若原始檔案是位於資料夾內的 `SKILL.md`，請使用該資料夾名稱作為新的 `.md` 檔案名稱（例如，`old_folder/SKILL.md` -> `sub_skills/old_folder.md`）。
+- 每個 toolkit 根目錄 (`<domain>-toolkit/`) MUST 包含 `SKILL.md` 作為其 router。
+- 不需要額外建立 `sub_skills/` 階層。子技能應直接以子資料夾形式放進 toolkit 目錄內（例如 `<domain>-toolkit/old_folder_name/`）。
+- **載入器防護機制**：子技能資料夾內的主檔案絕對「禁止」命名為 `SKILL.md` 或是其他保留名（如 `ROUTER.md`）。這是為了防止 Host 環境使用遞迴掃描 `glob("**/*.md")` 時，將子技能誤認為是 Router。請以目錄名稱作為主檔案名（例如 `my_skill/SKILL.md` 改名為 `my_skill/my_skill.md`）。
+- **Bundle 完整性**：若原始技能是以資料夾形式存在，必須將整個資料夾（含所有設定檔、提示詞、腳本）原封不動搬遷。
 
-### 1.2 Cleansing（最小可用）
+### 1.2 共用資源與相對路徑重寫 (MUST)
+- 在 Step 0 (Cleansing) 時，Agent MUST 靜態分析技能內容，找出任何參考外部或共用資料夾的相對路徑（例如 `../shared_utils/`）。
+- 若存在共用資料夾，必須將其搬遷至 `<domain>-toolkit/shared/`（若屬單一 toolkit）或 `global_shared/`（若跨 toolkit）。
+- Agent 搬遷時 MUST 自動去重寫與修正 `.md` 或腳本內相對應的路徑參考，確保引用不會斷裂。
+
+### 1.3 Cleansing（最小可用）
 每個 skill 最少要有：
 - `name`
 - `description`（必含：動作 + 物件 + 產出）
@@ -200,7 +204,7 @@ step: "2"
 schema_version: "2.2"
 migration_mapping:
   - old_path: "skills/x.md"
-    new_path: "devops-toolkit/sub_skills/rollout_service.md"
+    new_path: "devops-toolkit/rollout_service/rollout_service.md"
     new_skill_id: "rollout_service"
     rename_reason: ""
     coverage:
@@ -316,7 +320,7 @@ toolkits_generated:
             idempotent: false
             max_retries_override: 0
             requires_idempotency_key: true
-            compensating_action_path: "sub_skills/rollback_rollout_service.md"  # optional
+            compensating_action_path: "rollback_rollout_service/rollback_rollout_service.md"  # optional
           required_inputs:
             - {name: "trace_context", schema: {type: "object", additionalProperties: true}}
             - {name: "service_name", schema: {type: "string", minLength: 1}}
@@ -336,7 +340,7 @@ toolkits_generated:
           resources_touched: ["env://${environment}/service/${service_name}"]
           mutex_group: "deploy:${environment}:${service_name}"
           sensitive_outputs: ["deployment_report"]  # Host redactor should apply
-          path: "sub_skills/rollout_service.md"
+          path: "rollout_service/rollout_service.md"
 
     toolkit_router_skill_md: |
       ---
@@ -481,5 +485,5 @@ sub_skills:
     resources_touched: ["file://${x}"]
     mutex_group: "file:${x}"
     sensitive_outputs: ["y"]
-    path: "sub_skills/example.md"
+    path: "example/example.md"
 ```

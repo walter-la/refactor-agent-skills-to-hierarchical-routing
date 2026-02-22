@@ -40,15 +40,19 @@ schema_version: "2.2"
 
 ## 1) Hard Rules (MUST)
 
-### 1.1 File Naming & Directory Structure (MUST)
+### 1.1 File Naming & Bundle Preservation (MUST)
 - The global `root-router` directory MUST contain `SKILL.md` as its router.
 - Each toolkit root directory MUST contain `SKILL.md` as its router.
-- Under `<domain>-toolkit/sub_skills/**`, the sub-skill filename should be derived from its original skill name/folder (e.g., `aiddd-01-intake-classify.md`). Do NOT use overly long prefixes like `subskill__<domain>__` unless necessary to resolve collisions.
-- Under `sub_skills/**`, **any loader-reserved names are forbidden** (case-insensitive):
-  - `SKILL.md`, `SKILL.yaml`, `ROUTER.md`, `MASTER.md`, `INDEX.yaml`
-- If the original file was named `SKILL.md` inside a folder, use the folder name for the new `.md` file (e.g., `old_folder/SKILL.md` -> `sub_skills/old_folder.md`).
+- You do NOT need an artificial `sub_skills/` folder. Sub-skills should be placed directly inside the toolkit directory as subfolders (e.g., `<domain>-toolkit/old_folder_name/`).
+- **Host Loader Protection**: Under the toolkit subfolders, the entry point `.md` MUST NOT be named `SKILL.md` or any reserved name (`ROUTER.md`, `INDEX.yaml`). This prevents naive Host File Loaders from using `glob("**/*.md")` and confusing sub-skills with master routers. Rename the entry point to match the folder name (e.g., `my_skill/SKILL.md` -> `my_skill/my_skill.md`).
+- **Bundle Completeness**: If the original skill was a folder, the ENTIRE folder (including all scripts, schemas, and helper files) MUST be preserved and moved together.
 
-### 1.2 Cleansing (Minimum Viable)
+### 1.2 Shared Resources & Path Rewriting (MUST)
+- During Step 0 (Cleansing), the Agent MUST statically analyze the skill documents to discover any relative path references to external/shared folders (e.g., `../shared_utils/`).
+- If shared resources exist, they MUST be migrated to `<domain>-toolkit/shared/` (if toolkit-specific) or `global_shared/` (if cross-toolkit).
+- The Agent MUST safely rewrite any broken relative paths inside the migrated `.md` or code files to point to the new shared resource location.
+
+### 1.3 Cleansing (Minimum Viable)
 Each skill MUST have at least:
 - `name`
 - `description` (must include: action + object + deliverable)
@@ -200,7 +204,7 @@ step: "2"
 schema_version: "2.2"
 migration_mapping:
   - old_path: "skills/x.md"
-    new_path: "devops-toolkit/sub_skills/rollout_service.md"
+    new_path: "devops-toolkit/rollout_service/rollout_service.md"
     new_skill_id: "rollout_service"
     rename_reason: ""
     coverage:
@@ -316,7 +320,7 @@ toolkits_generated:
             idempotent: false
             max_retries_override: 0
             requires_idempotency_key: true
-            compensating_action_path: "sub_skills/rollback_rollout_service.md"  # optional
+            compensating_action_path: "rollback_rollout_service/rollback_rollout_service.md"  # optional
           required_inputs:
             - {name: "trace_context", schema: {type: "object", additionalProperties: true}}
             - {name: "service_name", schema: {type: "string", minLength: 1}}
@@ -336,7 +340,7 @@ toolkits_generated:
           resources_touched: ["env://${environment}/service/${service_name}"]
           mutex_group: "deploy:${environment}:${service_name}"
           sensitive_outputs: ["deployment_report"]  # Host redactor should apply
-          path: "sub_skills/rollout_service.md"
+          path: "rollout_service/rollout_service.md"
 
     toolkit_router_skill_md: |
       ---
@@ -481,5 +485,5 @@ sub_skills:
     resources_touched: ["file://${x}"]
     mutex_group: "file:${x}"
     sensitive_outputs: ["y"]
-    path: "sub_skills/example.md"
+    path: "example/example.md"
 ```
