@@ -68,6 +68,7 @@ schema_version: "2.2"
 - **Router markdown 嚴禁 fenced code blocks（```）**  
   - 若需呈現程式碼/合約片段：使用「四空白縮排碼塊」  
   - 原因：LLM 常在 ``` 與縮排互動下產生不可解析 YAML
+- **Frontmatter 閉合要求 (MUST)**：若產出帶有 YAML frontmatter 的 Markdown（如 `toolkit_router_skill_md`），該 YAML 區塊必須在頭部與**尾部**都嚴格加上 `---` 進行閉合，之後才可接續 Markdown 本文。
 - Step5 必須驗證：所有 step 產物可被 `yaml.safe_load` 解析
 
 ### 1.6 DAG + 並行安全（資料依賴 + 副作用互斥）
@@ -97,6 +98,16 @@ schema_version: "2.2"
 - **100% 完整複製 (Exact Match)**：在生成 Router (如 `SKILL.md`) 內的 `sub_skills` 註冊表時，必須完全照抄子技能原始 YAML 中的 `description` 內容，不可遺漏任何字元。
 - **禁止重新摘要或翻譯 (No Summarization / Translation)**：嚴禁使用 AI 模型重新歸納、縮減字數或自行翻譯。原始語言是中文就保留中文，是英文就保留英文。
 - **安全處理多行文字 (Safe YAML Block Scalar)**：若原始 `description` 包含多行文字，必須在 Router 的 YAML 陣列中使用安全的區塊標量符號（如 `|` 或 `>`），以確保換行符號不破壞整份文件的 YAML 結構。
+
+### 1.9 Toolkit Router 描述生成 (語意最佳化, MUST)
+在產出 Router 的 `description`（如 Step 3 / Step 5）時，你必須扮演 Master Router Architect 的角色，將 LLM 意圖路由的「語意命中率 (Semantic Hit Rate)」最大化，避免產生「語意覆蓋不足」與「致命的結構空白」。
+1. **萃取 (Extract)**: 讀取所有子技能的 descriptions。列出所有獨特的動作動詞（例如：撰寫、分流、審查）以及目標實體（例如：SPEC、CI、PR、Approval）。
+2. **分群 (Cluster)**: 將這些詞彙分組為 3 到 5 個具備邏輯關聯的能力領域 (Capability Domains)。
+3. **起草 (Draft)**: 依照以下確切的結構撰寫主 `description`：
+   - **主要定位 (Primary Identity)**: 用 1~2 句話說明整體的框架與主要目的。
+   - **核心領域/階段 (Core Phases/Domains)**: 條列出前一步分群的 3~5 個領域，必須明確包含萃取出的關鍵字。
+   - **觸發時機 ("Use When" Triggers)**: 使用無序列單列出 3~4 個明確的使用者意圖，說明「當使用者提出這些需求時，必須路由至此 Toolkit」。
+4. **稽核 (Audit)**: 確認 **每一個子技能** 至少有一個語意錨點（相關關鍵字或概念）出現在最終的 Router description 內。例如：若某個子技能負責「舊代碼萃取」，但你的 Router 描述卻只提到「新功能交付」，則必須重寫描述以明確包含該特定處理需求。
 
 ---
 

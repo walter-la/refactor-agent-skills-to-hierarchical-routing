@@ -68,6 +68,7 @@ Each skill MUST have at least:
 - **Router markdown MUST NOT contain fenced code blocks (```)**
   - If you must show code/contract fragments: use “4-space indented code blocks”
   - Reason: LLMs often create unparseable YAML when mixing ``` and indentation
+- **Frontmatter Closure (MUST)**: When generating Markdown files with a YAML frontmatter (e.g. `toolkit_router_skill_md`), the YAML block MUST be strictly enclosed by `---` at BOTH the top and the bottom before the Markdown body begins.
 - Step5 MUST verify: all step artifacts are parseable by `yaml.safe_load`
 
 ### 1.6 DAG + Concurrency Safety (Data Dependencies + Side-effect Mutex)
@@ -97,6 +98,16 @@ Each skill MUST have at least:
 - **100% Exact Match**: When generating the `sub_skills` registry inside a Router (e.g., `SKILL.md`), you MUST exactly copy the `description` content from the sub-skill's original YAML. Do not omit any characters.
 - **No Summarization / Translation**: It is strictly forbidden to use AI models to summarize, shorten, or translate the description. Keep the original language exactly as it is (e.g., if the original is Chinese, keep Chinese; if English, keep English).
 - **Safe YAML Block Scalar**: If the original `description` contains multiple lines of text, you MUST use safe block scalar symbols (e.g., `|` or `>`) within the Router's YAML array to ensure newlines do not break the entire document's YAML structure.
+
+### 1.9 Toolkit Router Description Generation (Semantic Optimization, MUST)
+When generating the master Router's `description` field (e.g., in Step 3), you must act as a Master Router Architect to maximize the semantic hit rate for LLM intent routing. You MUST ensure the description prevents both "semantic coverage gaps" and "structural blind spots".
+1. **Extract**: Read all sub-skills' descriptions. List all unique action verbs (e.g., author, triage, review) and target entities.
+2. **Cluster**: Group these into 3 to 5 logical capability domains.
+3. **Draft**: Write the main `description` using this exact structure:
+   - **Primary Identity**: 1-2 sentences explaining the overarching framework/purpose.
+   - **Core Phases/Domains**: A numbered list of the 3-5 clustered domains, explicitly mentioning the extracted keywords.
+   - **"Use When" Triggers**: A bulleted list of 3-4 explicit user intents that MUST route to this toolkit.
+4. **Audit**: Ensure that *every single sub-skill* has at least one semantic hook (a related keyword or concept) present in your final parent description. If a sub-skill handles a specific task (e.g., "Legacy code extraction"), but the parent description only broadly mentions "New feature delivery", you must rewrite the parent description to explicitly include that specific semantic hook.
 
 ---
 
