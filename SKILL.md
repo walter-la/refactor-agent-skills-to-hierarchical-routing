@@ -93,6 +93,11 @@ Each skill MUST have at least:
   - `failure_report`
   - `manual_cleanup_recommendations`
 
+### 1.8 Sub-skill Registry Fidelity (MUST)
+- **100% Exact Match**: When generating the `sub_skills` registry inside a Router (e.g., `SKILL.md`), you MUST exactly copy the `description` content from the sub-skill's original YAML. Do not omit any characters.
+- **No Summarization / Translation**: It is strictly forbidden to use AI models to summarize, shorten, or translate the description. Keep the original language exactly as it is (e.g., if the original is Chinese, keep Chinese; if English, keep English).
+- **Safe YAML Block Scalar**: If the original `description` contains multiple lines of text, you MUST use safe block scalar symbols (e.g., `|` or `>`) within the Router's YAML array to ensure newlines do not break the entire document's YAML structure.
+
 ---
 
 ## 2) Type System (Machine-verifiable) (MUST)

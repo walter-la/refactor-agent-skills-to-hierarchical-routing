@@ -20,7 +20,7 @@ Think of this as a **corporate restructuring for your AI Agent**:
     > "Wait! You want to run A and B simultaneously? No, they touch the same database; they must be queued (Mutex)!"
     > "Wait! You're outputting a Log? I need to mask the Tokens and Passwords (`***MASKED***`) first!"
 
-👉 **You can directly browse [examples/unpacked_results/dummy-toolkit/](examples/unpacked_results/dummy-toolkit/) to experience how rigorous and structured the "After" state is.**
+👉 **You can directly browse [examples/03-outputs/skills/dummy-toolkit/](examples/03-outputs/skills/dummy-toolkit/) to experience how rigorous and structured the "After" state is.**
 
 ---
 
@@ -44,7 +44,7 @@ If you feed the `SKILL.md` prompt from this repository to your AI Agent along wi
 1.  Pick the instruction file for your team:
     *   **English Teams**: Feed `SKILL.md` to your Agent.
     *   **Chinese Teams**: Feed `SKILL.zh-TW.md` to your Agent.
-2.  Provide the Agent with your existing skills inventory (refer to `examples/inputs/`).
+2.  Provide the Agent with your existing skills inventory (refer to `examples/01-inputs/skills/`).
 3.  Extract the Step 0 to Step 5 YAML outputs from the Agent, and write a small script to "unpack" them into actual directories.
 
 ---
@@ -56,9 +56,10 @@ If you feed the `SKILL.md` prompt from this repository to your AI Agent along wi
 .
 ├── SKILL.md                 # Canonical English skill descriptor
 ├── SKILL.zh-TW.md           # Traditional Chinese skill descriptor
-├── examples/                # Example Inputs and Step0-Step5 output YAMLs
-│   ├── inputs/
-│   └── outputs/
+├── examples/                # Examples containing original inputs, process, and outputs
+│   ├── 01-inputs/           # Mock original flattened skills directory
+│   ├── 02-intermediate/     # Intermediate YAML outputs from Step 0 to Step 5
+│   └── 03-outputs/          # The final unpacked hierarchical routing toolkit structures
 ├── tools/                   # Validation tools
 │   └── validate_repo.py
 └── ...

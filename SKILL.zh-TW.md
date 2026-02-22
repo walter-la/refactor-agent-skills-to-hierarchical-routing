@@ -93,6 +93,11 @@ schema_version: "2.2"
   - `failure_report`
   - `manual_cleanup_recommendations`
 
+### 1.8 子技能註冊表還原度 (Sub-skill Registry Fidelity) (MUST)
+- **100% 完整複製 (Exact Match)**：在生成 Router (如 `SKILL.md`) 內的 `sub_skills` 註冊表時，必須完全照抄子技能原始 YAML 中的 `description` 內容，不可遺漏任何字元。
+- **禁止重新摘要或翻譯 (No Summarization / Translation)**：嚴禁使用 AI 模型重新歸納、縮減字數或自行翻譯。原始語言是中文就保留中文，是英文就保留英文。
+- **安全處理多行文字 (Safe YAML Block Scalar)**：若原始 `description` 包含多行文字，必須在 Router 的 YAML 陣列中使用安全的區塊標量符號（如 `|` 或 `>`），以確保換行符號不破壞整份文件的 YAML 結構。
+
 ---
 
 ## 2) 型別系統（可機器驗證）(MUST)

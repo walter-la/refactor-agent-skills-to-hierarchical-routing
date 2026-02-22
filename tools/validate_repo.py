@@ -49,9 +49,9 @@ def main():
 
     canon_version = en_fm["schema_version"]
 
-    outputs_dir = os.path.join(root, "examples", "outputs")
+    outputs_dir = os.path.join(root, "examples", "02-intermediate", "steps")
     if not os.path.exists(outputs_dir):
-        print("Error: examples/outputs directory missing")
+        print("Error: examples/02-intermediate/steps directory missing")
         sys.exit(1)
 
     for i in range(6):

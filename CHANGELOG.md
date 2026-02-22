@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Bilingual README files (English and Traditional Chinese)
-- Missing examples (inputs and dummy outputs Step0-5)
+- Missing examples (01-inputs, 02-intermediate steps 0-5, and 03-outputs)
 - Repository validation script (`tools/validate_repo.py`)
 - Standard OSS files: LICENSE, CHANGELOG, CONTRIBUTING policies
 - GitHub Actions CI workflow
