@@ -8,14 +8,16 @@ input_inventory:
   input_skills:
     - old_path: "dummy-01-intake/SKILL.md"
       detected_name: "dummy-01-intake"
-      detected_description: "Intake phase. Parses issue descriptions and outputs structured task data."
+      detected_description: |
+        Intake phase. Parses issue descriptions and outputs structured task data.
       io_inferred: true
       reserved_name_conflict: true
       confidence: "high"
       bundle_files: ["dummy-01-intake/prompt.txt"]
     - old_path: "dummy-02-extract/SKILL.md"
       detected_name: "dummy-02-extract"
-      detected_description: "Extract specifications from the task using the shared schema."
+      detected_description: |
+        Extract specifications from the task using the shared schema.
       io_inferred: true
       reserved_name_conflict: true
       confidence: "high"

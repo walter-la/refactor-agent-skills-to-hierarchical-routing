@@ -14,11 +14,13 @@ You MUST route the user's intent to the appropriate sub-skill from the registry 
     sub_skills:
       - id: "dummy-01-intake"
         name: "Intake"
-        description: "Intake phase."
+        description: |
+          Intake phase. Parses issue descriptions and outputs structured task data.
         path: "dummy-01-intake/dummy-01-intake.md"
       - id: "dummy-02-extract"
         name: "Extract"
-        description: "Extract phase."
+        description: |
+          Extract specifications from the task using the shared schema.
         path: "dummy-02-extract/dummy-02-extract.md"
 
 ## MUST: Scheduling Rules
