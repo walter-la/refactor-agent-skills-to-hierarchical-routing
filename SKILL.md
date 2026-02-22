@@ -19,8 +19,9 @@ schema_version: "2.2"
 ## 0) Goals (MUST)
 
 ### 0.1 Toolkit Goals
-- Produce 2–12 `<domain>-toolkit` toolkits (target 5–12; may reduce to 2–4 if insufficient, but Step5 MUST explain why)
-- Each toolkit has ≤30 sub-skills; `misc-toolkit` ≤20
+- **Cohesion over Fragmentation**: If a cohesive domain (e.g., skills sharing a common prefix or purpose) contains ≤ 30 skills, group them into a SINGLE toolkit. Do NOT artificially split them just to create multiple toolkits.
+- If the entire skill inventory is large and diverse, produce 2–5 `<domain>-toolkit` toolkits.
+- Each toolkit MUST have ≤ 30 sub-skills; `misc-toolkit` ≤ 20.
 - MUST additionally produce **1 `root-router` (global router)** to dispatch to toolkits and support cross-toolkit pipelines
 
 ### 0.2 Output Format & Verifiability
@@ -39,12 +40,13 @@ schema_version: "2.2"
 
 ## 1) Hard Rules (MUST)
 
-### 1.1 No Nested Masters (Directories / Reserved Names)
-- A toolkit root directory may contain `SKILL.md` (router)
-- The global `root-router` root directory may contain `SKILL.md`
+### 1.1 File Naming & Directory Structure (MUST)
+- The global `root-router` directory MUST contain `SKILL.md` as its router.
+- Each toolkit root directory MUST contain `SKILL.md` as its router.
+- Under `<domain>-toolkit/sub_skills/**`, the sub-skill filename should be derived from its original skill name/folder (e.g., `aiddd-01-intake-classify.md`). Do NOT use overly long prefixes like `subskill__<domain>__` unless necessary to resolve collisions.
 - Under `sub_skills/**`, **any loader-reserved names are forbidden** (case-insensitive):
   - `SKILL.md`, `SKILL.yaml`, `ROUTER.md`, `MASTER.md`, `INDEX.yaml`
-- Conflicts MUST be renamed to: `subskill__<domain>__<slug>.md`, and the reason must be recorded
+- If the original file was named `SKILL.md` inside a folder, use the folder name for the new `.md` file (e.g., `old_folder/SKILL.md` -> `sub_skills/old_folder.md`).
 
 ### 1.2 Cleansing (Minimum Viable)
 Each skill MUST have at least:

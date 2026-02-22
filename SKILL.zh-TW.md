@@ -19,8 +19,9 @@ schema_version: "2.2"
 ## 0) 目標 (MUST)
 
 ### 0.1 Toolkit 目標
-- 產出 2–12 個 `<domain>-toolkit`（目標 5–12；不足可降至 2–4，但 Step5 必須說明原因）
-- 每 toolkit 子技能 ≤30；`misc-toolkit` ≤20
+- **高內聚優先 (Cohesion over Fragmentation)**：如果一組高度相關的技能（例如具有相同前綴或領域目的）總數在 30 個以內，應將其打包為單一 Toolkit。請勿為了硬湊數量而將其強行拆散。
+- 只有當整體技能庫跨度過大或總數過多時，才切分為 2–5 個 `<domain>-toolkit`。
+- 每 toolkit 子技能 ≤30；`misc-toolkit` ≤20。
 - 必須額外產出 **1 個 `root-router`（全域路由）**，用來分派至 toolkits 並支援跨 toolkit pipeline
 
 ### 0.2 輸出格式與可驗證性
@@ -39,12 +40,13 @@ schema_version: "2.2"
 
 ## 1) 硬性規則 (MUST)
 
-### 1.1 No Nested Masters（目錄/保留名）
-- toolkit 根目錄允許 `SKILL.md`（router）
-- 全域 `root-router` 根目錄允許 `SKILL.md`
+### 1.1 檔案命名與目錄結構 (MUST)
+- 全域 `root-router` 目錄 MUST 包含 `SKILL.md` 作為其 router。
+- 每個 toolkit 根目錄 MUST 包含 `SKILL.md` 作為其 router。
+- 在 `<domain>-toolkit/sub_skills/**` 下，子技能檔案名稱應直接使用其原始技能的名稱或資料夾名稱（例如 `aiddd-01-intake-classify.md`）。除非需要解決衝突，否則請勿使用過長的 prefix（例如 `subskill__<domain>__`）。
 - `sub_skills/**` 禁止任何 loader 保留名（case-insensitive）：
   - `SKILL.md`, `SKILL.yaml`, `ROUTER.md`, `MASTER.md`, `INDEX.yaml`
-- 衝突必須 rename：`subskill__<domain>__<slug>.md`，並記錄原因
+- 若原始檔案是位於資料夾內的 `SKILL.md`，請使用該資料夾名稱作為新的 `.md` 檔案名稱（例如，`old_folder/SKILL.md` -> `sub_skills/old_folder.md`）。
 
 ### 1.2 Cleansing（最小可用）
 每個 skill 最少要有：
