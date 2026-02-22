@@ -41,24 +41,28 @@ schema_version: "2.2"
 ## 1) Hard Rules (MUST)
 
 ### 1.1 File Naming & Bundle Preservation (MUST)
-- Each toolkit root directory (`<domain>-toolkit/`) MUST contain `SKILL.md` as its router.
+- The toolkit root directory (`<domain>-toolkit/`) MUST contain its router file exactly named `SKILL.md`. It MUST NEVER be named `<domain>-toolkit.md`.
 - You do NOT need an artificial `sub_skills/` folder. Sub-skills should be placed directly inside the toolkit directory as subfolders (e.g., `<domain>-toolkit/old_folder_name/`).
-- **Host Loader Protection**: Under the toolkit subfolders, the entry point `.md` MUST NOT be named `SKILL.md` or any reserved name (`ROUTER.md`, `INDEX.yaml`). This prevents naive Host File Loaders from using `glob("**/*.md")` and confusing sub-skills with master routers. Rename the entry point to match the folder name (e.g., `my_skill/SKILL.md` -> `my_skill/my_skill.md`).
+- **Host Loader Protection (Sub-skills only)**: Under the toolkit subfolders, the entry point `.md` for **sub-skills** MUST NOT be named `SKILL.md` or any reserved name (`ROUTER.md`, `INDEX.yaml`). This prevents naive Host File Loaders from using `glob("**/*.md")` and confusing sub-skills with master routers. Rename the entry point to match the folder name (e.g., `my_skill/SKILL.md` -> `my_skill/my_skill.md`).
 - **Bundle Completeness**: If the original skill was a folder, the ENTIRE folder (including all scripts, schemas, and helper files) MUST be preserved and moved together.
 
-### 1.2 Shared Resources & Path Rewriting (MUST)
-- During Step 0 (Cleansing), the Agent MUST statically analyze the skill documents to discover any relative path references to external/shared folders (e.g., `../shared_utils/`).
-- If shared resources exist, they MUST be migrated to `<domain>-toolkit/shared/` (if toolkit-specific) or `global_shared/` (if cross-toolkit).
-- The Agent MUST safely rewrite any broken relative paths inside the migrated `.md` or code files to point to the new shared resource location.
+### 1.2 File Encoding & Artifact Cleanup (MUST)
+- **UTF-8 Encoding**: When reading or modifying files, the Agent MUST preserve file encoding. All file modifications MUST explicitly use UTF-8 encoding (without BOM) to prevent non-ASCII characters (like Chinese text) from becoming garbled.
+- **Cleanup**: After refactoring, the Agent MUST clean up any temporary artifacts generated during the process (e.g., delete `step0-5-contracts.yaml` left in the toolkit directory, and delete any temporary migration scripts like `refactor_*.ps1` left in the `skills` directory).
 
-### 1.3 Cleansing (Minimum Viable)
+### 1.3 Shared Resources & Path Rewriting (MUST)
+- During Step 0 (Cleansing), the Agent MUST statically analyze the skill documents to discover any relative path references to external/shared folders (e.g., `../shared_utils/`).
+- If shared resources exist, they MUST be migrated into the toolkit (or kept global if cross-toolkit), BUT they MUST keep their original folder name (e.g., if the folder was `shared_utils`, it stays `shared_utils` and is NOT renamed to `shared`).
+- The Agent MUST safely rewrite any broken relative paths inside the migrated `.md` or code files to correctly point to the moved shared resources.
+
+### 1.4 Cleansing (Minimum Viable)
 Each skill MUST have at least:
 - `name`
 - `description` (must include: action + object + deliverable)
 - `required_inputs[]`, `outputs[]` (if missing, fill them and mark `confidence: low`)
 - If side effects are involved: MUST add `side_effects[]`, `resources_touched[]`, `mutex_group` (low-confidence inference is acceptable initially)
 
-### 1.3 YAML Parseability (YAML-safe profile)
+### 1.5 YAML Parseability (YAML-safe profile)
 - Multi-line strings: MUST use block scalars `|` or `>`
 - Single-line strings: add quotes when needed (avoid YAML ambiguity)
 - **Router markdown MUST NOT contain fenced code blocks (```)**
@@ -66,7 +70,7 @@ Each skill MUST have at least:
   - Reason: LLMs often create unparseable YAML when mixing ``` and indentation
 - Step5 MUST verify: all step artifacts are parseable by `yaml.safe_load`
 
-### 1.4 DAG + Concurrency Safety (Data Dependencies + Side-effect Mutex)
+### 1.6 DAG + Concurrency Safety (Data Dependencies + Side-effect Mutex)
 - A DAG edge exists if any of the following indicates dependency:
   - `depends_on`
   - `input_bindings(from_skill)`
@@ -76,7 +80,7 @@ Each skill MUST have at least:
   - No `mutex_group` conflicts
   - No overlap in `resources_touched` (matched by glob/prefix rules)
 
-### 1.5 Security (Declarative + Host Delegation)
+### 1.7 Security (Declarative + Host Delegation)
 - Redaction scope: `logs`, `handoff`, `final_outputs`
 - Redaction detection (declarative rules):
   - key-name contains (case-insensitive): token/secret/password/apikey/authorization/cookie/session/key

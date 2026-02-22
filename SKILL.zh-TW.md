@@ -41,24 +41,28 @@ schema_version: "2.2"
 ## 1) 硬性規則 (MUST)
 
 ### 1.1 檔案命名與 Bundle 保留原則 (MUST)
-- 每個 toolkit 根目錄 (`<domain>-toolkit/`) MUST 包含 `SKILL.md` 作為其 router。
+- Toolkit 根目錄 (`<domain>-toolkit/`) 下的 Router 檔案名稱 MUST 固定為 `SKILL.md`，絕對不可命名為 `<domain>-toolkit.md`。
 - 不需要額外建立 `sub_skills/` 階層。子技能應直接以子資料夾形式放進 toolkit 目錄內（例如 `<domain>-toolkit/old_folder_name/`）。
-- **載入器防護機制**：子技能資料夾內的主檔案絕對「禁止」命名為 `SKILL.md` 或是其他保留名（如 `ROUTER.md`）。這是為了防止 Host 環境使用遞迴掃描 `glob("**/*.md")` 時，將子技能誤認為是 Router。請以目錄名稱作為主檔案名（例如 `my_skill/SKILL.md` 改名為 `my_skill/my_skill.md`）。
+- **載入器防護機制（僅限子技能）**：**子技能**資料夾內的主檔案絕對「禁止」命名為 `SKILL.md` 或是其他保留名（如 `ROUTER.md`）。這是為了防止 Host 環境使用遞迴掃描 `glob("**/*.md")` 時，將子技能誤認為是 Router。請以目錄名稱作為主檔案名（例如 `my_skill/SKILL.md` 改名為 `my_skill/my_skill.md`）。
 - **Bundle 完整性**：若原始技能是以資料夾形式存在，必須將整個資料夾（含所有設定檔、提示詞、腳本）原封不動搬遷。
 
-### 1.2 共用資源與相對路徑重寫 (MUST)
-- 在 Step 0 (Cleansing) 時，Agent MUST 靜態分析技能內容，找出任何參考外部或共用資料夾的相對路徑（例如 `../shared_utils/`）。
-- 若存在共用資料夾，必須將其搬遷至 `<domain>-toolkit/shared/`（若屬單一 toolkit）或 `global_shared/`（若跨 toolkit）。
-- Agent 搬遷時 MUST 自動去重寫與修正 `.md` 或腳本內相對應的路徑參考，確保引用不會斷裂。
+### 1.2 檔案編碼與產物清理 (MUST)
+- **UTF-8 編碼**：Agent 在讀取與寫入檔案時，MUST 確保保留原有編碼。所有的檔案修改與寫入 MUST 明確使用 UTF-8 (無 BOM) 編碼，以防止非 ASCII 字元（如中文）變成亂碼。
+- **清理過渡產物**：在重構與搬遷完成後，Agent MUST 負責刪除過程中的臨時產物（例如：殘留在 toolkit 目錄的 `step0-5-contracts.yaml`，以及殘留在 `skills` 目錄的 `refactor_*.ps1` 等腳本）。
 
-### 1.3 Cleansing（最小可用）
+### 1.3 共用資源與相對路徑重寫 (MUST)
+- 在 Step 0 (Cleansing) 時，Agent MUST 靜態分析技能內容，找出任何參考外部或共用資料夾的相對路徑（例如 `../shared_utils/`）。
+- 若存在共用資料夾，必須將其搬遷至 toolkit 內（若屬單一 toolkit）或保留於全域（若跨 toolkit），**但 MUST 保留其原始的資料夾名稱**（例如：原本叫 `shared_utils` 就必須維持 `shared_utils`，不可隨意改名為 `shared`）。
+- Agent 搬遷時 MUST 自動修正 `.md` 或腳本內相對應的路徑參考，確認相對路徑的表示正確，確保引用不會斷裂。
+
+### 1.4 Cleansing（最小可用）
 每個 skill 最少要有：
 - `name`
 - `description`（必含：動作 + 物件 + 產出）
 - `required_inputs[]`、`outputs[]`（缺就補，並標 `confidence: low`）
 - 若涉及副作用：必須補 `side_effects[]`、`resources_touched[]`、`mutex_group`（可先低信心推測）
 
-### 1.3 YAML 可解析（YAML-safe profile）
+### 1.5 YAML 可解析（YAML-safe profile）
 - 多行字串：必用 block scalar `|` 或 `>`
 - 單行字串：必要時加引號（避免 YAML 歧義）
 - **Router markdown 嚴禁 fenced code blocks（```）**  
@@ -66,7 +70,7 @@ schema_version: "2.2"
   - 原因：LLM 常在 ``` 與縮排互動下產生不可解析 YAML
 - Step5 必須驗證：所有 step 產物可被 `yaml.safe_load` 解析
 
-### 1.4 DAG + 並行安全（資料依賴 + 副作用互斥）
+### 1.6 DAG + 並行安全（資料依賴 + 副作用互斥）
 - DAG 邊來源（任何一種都算依賴）：
   - `depends_on`
   - `input_bindings(from_skill)`
@@ -76,7 +80,7 @@ schema_version: "2.2"
   - `mutex_group` 不衝突
   - `resources_touched` 無交集（以 glob/prefix 規則比對）
 
-### 1.5 Security（宣告式 + Host Delegation）
+### 1.7 Security（宣告式 + Host Delegation）
 - 遮蔽作用範圍：`logs`, `handoff`, `final_outputs`
 - 遮蔽偵測（宣告式規則）：
   - key-name contains（不分大小寫）：token/secret/password/apikey/authorization/cookie/session/key
