@@ -22,7 +22,7 @@ schema_version: "2.2"
 - **Cohesion over Fragmentation**: If a cohesive domain (e.g., skills sharing a common prefix or purpose) contains ≤ 30 skills, group them into a SINGLE toolkit. Do NOT artificially split them just to create multiple toolkits.
 - If the entire skill inventory is large and diverse, produce 2–5 `<domain>-toolkit` toolkits.
 - Each toolkit MUST have ≤ 30 sub-skills; `misc-toolkit` ≤ 20.
-- MUST additionally produce **1 `root-router` (global router)** to dispatch to toolkits and support cross-toolkit pipelines
+- Each `<domain>-toolkit` MUST contain a `SKILL.md` file that acts as the routing entry point for that domain. The `description` field in its YAML is CRITICAL and must accurately reflect the intent of all its sub-skills to ensure the Host Agent routes to it correctly.
 
 ### 0.2 Output Format & Verifiability
 - Step0–5 outputs must each be **a single parseable YAML**
@@ -41,8 +41,7 @@ schema_version: "2.2"
 ## 1) Hard Rules (MUST)
 
 ### 1.1 File Naming & Bundle Preservation (MUST)
-- The global `root-router` directory MUST contain `SKILL.md` as its router.
-- Each toolkit root directory MUST contain `SKILL.md` as its router.
+- Each toolkit root directory (`<domain>-toolkit/`) MUST contain `SKILL.md` as its router.
 - You do NOT need an artificial `sub_skills/` folder. Sub-skills should be placed directly inside the toolkit directory as subfolders (e.g., `<domain>-toolkit/old_folder_name/`).
 - **Host Loader Protection**: Under the toolkit subfolders, the entry point `.md` MUST NOT be named `SKILL.md` or any reserved name (`ROUTER.md`, `INDEX.yaml`). This prevents naive Host File Loaders from using `glob("**/*.md")` and confusing sub-skills with master routers. Rename the entry point to match the folder name (e.g., `my_skill/SKILL.md` -> `my_skill/my_skill.md`).
 - **Bundle Completeness**: If the original skill was a folder, the ENTIRE folder (including all scripts, schemas, and helper files) MUST be preserved and moved together.
@@ -138,7 +137,7 @@ If a pipeline crosses toolkits, you MUST explicitly pass state via `global_conte
 
 * `context_writes[]`: which keys a skill writes into global_context (with type declarations)
 * `context_reads[]`: which keys a skill depends on (with type declarations)
-* Root Router MUST govern: missing keys → ask 1 question; or in batch mode → fail-fast
+* The Router MUST govern: missing keys → ask 1 question; or in batch mode → fail-fast
 
 Recommended key naming:
 
@@ -148,7 +147,7 @@ Recommended key naming:
 
 ### 3.2 Artifact Registry (Coverage & Traceability)
 
-Root Router should maintain an artifact registry (declarative):
+The orchestrating Router should maintain an artifact registry (declarative):
 
 * Any important output (reports, change tickets, deployment summaries) should have an `artifact_id`
 * Enables auditing, reruns, reconciliation (coverage verification becomes easier)
@@ -177,16 +176,13 @@ input_inventory:
       confidence: "low"  # low|medium|high
 ```
 
-### Step 1: Domain Grouping (incl. root-router)
+### Step 1: Domain Grouping
 
 ```yaml
 step: "1"
 schema_version: "2.2"
-target_toolkits_range: "5-12"
+target_toolkits_range: "2-5"
 actual_toolkits_count: 0
-root_router:
-  name: "root-router"
-  purpose: "global_intent_routing_and_cross_toolkit_pipelines"
 toolkits:
   - toolkit: "devops-toolkit"
     verbs: ["deploy","monitor"]
@@ -217,11 +213,10 @@ coverage_report:
   coverage_ratio: 1.0
 ```
 
-### Step 3: Generate Root Router + Toolkit Routers (YAML-safe)
+### Step 3: Generate Toolkit Routers (YAML-safe)
 
 **Token truncation protection (toolkits > 3)**
 
-* MUST fully output: `root-router` (must be complete; otherwise cross-toolkit is unusable)
 * For toolkits: fully output only the 1st toolkit (index + router_md); output drafts for the rest + `pending_generation[]`
 
 ````yaml
@@ -242,53 +237,6 @@ global_routing_spec:
   security:
     redaction_mode: "external_interceptor_preferred"   # inline_allowed | external_interceptor_preferred | external_only
     mask_value: "***MASKED***"
-
-root_router_generated:
-  root_router_index_yaml: |
-    schema_version: "2.2"
-    router: "root-router"
-    routing_mode: "deterministic_then_semantic"
-    semantic_confidence_threshold: 0.72
-    toolkits:
-      - {toolkit: "devops-toolkit",  description: "Deployment/Monitoring/Availability/Incident Response"}
-      - {toolkit: "infra-toolkit",   description: "Provisioning/Networking/Hosts/Permissions"}
-      - {toolkit: "data-toolkit",    description: "Query/Aggregation/Reporting/Data Pipelines"}
-      - {toolkit: "misc-toolkit",    description: "Unclear or long-tail tasks (≤20)"}
-    global_context_contract:
-      required_mode: "explicit_reads_writes"
-      forbidden_keys:
-        - "secrets.raw"  # plaintext secrets forbidden
-    observability:
-      require_trace_context: true
-    security:
-      requires_redaction: true
-      mask_value: "***MASKED***"
-      sensitive_scopes: ["logs","handoff","final_outputs"]
-      redaction_rules_declared:
-        key_name_contains: ["token","secret","password","apikey","authorization","cookie","session","key"]
-        value_patterns:
-          - {name: "jwt", regex: "eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"}
-          - {name: "pem_private_key", regex: "-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----"}
-          - {name: "aws_access_key_id", regex: "AKIA[0-9A-Z]{16}"}
-
-  root_router_skill_md: |
-    ---
-    name: root-router
-    description: |
-      Global router: dispatch user intent to the appropriate toolkit, and orchestrate cross-toolkit pipelines (including global_context, DAG, concurrency safety, idempotency/retries, observability, and declarative security redaction).
-    ---
-    # Root Router (Global)
-
-    ## MUST: Routing & Orchestration
-    1) Intent Routing: hit a toolkit via deterministic rules first; otherwise use semantic routing (threshold 0.72).
-    2) Cross-Toolkit Pipeline: if multiple toolkits are needed, build a global DAG and pass state explicitly via global_context.
-    3) Observability: all sub-skills must carry trace_context (trace_id/span_id) through inputs/outputs.
-    4) Security: declare requires_redaction; the Host Interceptor performs actual redaction (logs/handoff/final_outputs).
-    5) Failure: output failure_report + manual_cleanup_recommendations.
-
-    ## MUST: Cycle Resolution (incl. unattended fallback)
-    - If a cycle is detected: ask 1 clarification question (resolution_question)
-    - If no response before timeout: execute fallback_strategy (fail_fast or break_lowest_confidence_edge)
 
 toolkits_generated:
   - toolkit: "devops-toolkit"
@@ -413,8 +361,6 @@ schema_version: "2.2"
 lint_report:
   coverage_ratio: 1.0
   uncovered_inputs: []
-  root_router_present_ok: true
-  global_master_router_count_ok: true
   toolkits_sub_skills_limit_ok: true
   misc_toolkit_limit_ok: true
   no_nested_master_ok: true

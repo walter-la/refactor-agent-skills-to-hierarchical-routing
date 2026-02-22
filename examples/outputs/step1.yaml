@@ -1,22 +1,14 @@
 step: "1"
 schema_version: "2.2"
-target_toolkits_range: "2-4"
-actual_toolkits_count: 2
-root_router:
-  name: "root-router"
-  purpose: "global_intent_routing_and_cross_toolkit_pipelines"
+target_toolkits_range: "2-5"
+actual_toolkits_count: 1
 toolkits:
   - toolkit: "dummy-toolkit"
-    verbs: ["do"]
-    objects: ["something"]
+    verbs: ["classify", "extract"]
+    objects: ["issue", "spec"]
     skills: 
-      - old_path: "examples/inputs/dummy1.md"
-      - old_path: "examples/inputs/dummy2.md"
-  - toolkit: "misc-toolkit"
-    verbs: ["miscellaneous"]
-    objects: ["stuff"]
-    skills:
-      - old_path: "examples/inputs/dummy3.md"
+      - {old_path: "dummy-01-intake/SKILL.md"}
+      - {old_path: "dummy-02-extract/SKILL.md"}
 constraints:
   per_toolkit_skill_limit: 30
   misc_skill_limit: 20

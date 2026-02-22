@@ -3,8 +3,6 @@ schema_version: "2.2"
 lint_report:
   coverage_ratio: 1.0
   uncovered_inputs: []
-  root_router_present_ok: true
-  global_master_router_count_ok: true
   toolkits_sub_skills_limit_ok: true
   misc_toolkit_limit_ok: true
   no_nested_master_ok: true
@@ -20,5 +18,3 @@ lint_report:
   security_redaction_delegation_ok: true
 violations: []
 auto_repairs_applied: []
-notes: |
-  All ok

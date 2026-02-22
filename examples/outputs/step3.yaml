@@ -3,101 +3,27 @@ schema_version: "2.2"
 global_routing_spec:
   routing_mode: "deterministic_then_semantic"
   semantic_confidence_threshold: 0.72
-  tie_breaker:
-    mode: "ask_one_question_then_fallback"
-    fallback_strategy:
-      on_no_user_response: "fail_fast"
-      default_max_wait_ms: 30000
-  global_context:
-    enabled: true
-    mode: "explicit_reads_writes"
-  security:
-    redaction_mode: "external_interceptor_preferred"
-    mask_value: "***MASKED***"
-root_router_generated:
-  root_router_index_yaml: |
-    schema_version: "2.2"
-    router: "root-router"
-    routing_mode: "deterministic_then_semantic"
-    semantic_confidence_threshold: 0.72
-    toolkits:
-      - {toolkit: "dummy-toolkit", description: "Dummy toolkit"}
-      - {toolkit: "misc-toolkit", description: "Misc"}
-    global_context_contract:
-      required_mode: "explicit_reads_writes"
-      forbidden_keys:
-        - "secrets.raw"
-    observability:
-      require_trace_context: true
-    security:
-      requires_redaction: true
-      mask_value: "***MASKED***"
-      sensitive_scopes: ["logs","handoff","final_outputs"]
-      redaction_rules_declared:
-        key_name_contains: ["token","secret"]
-        value_patterns: []
-  root_router_skill_md: |
-    ---
-    name: root-router
-    description: Global dummy router
-    ---
-    # Root Router
-    
-    ## Routing
-    1) Deterministic then semantic.
-    
-    ## Cycle Resolution
-        cycle_resolution:
-          cycle_detected: false
+
 toolkits_generated:
   - toolkit: "dummy-toolkit"
     toolkit_index_yaml: |
       schema_version: "2.2"
       toolkit: "dummy-toolkit"
       routing_mode: "deterministic_then_semantic"
-      security:
-        requires_redaction: true
-        redaction_mode: "external_interceptor_preferred"
-        mask_value: "***MASKED***"
-        redaction_rules_declared:
-          key_name_contains: ["secret"]
-          value_patterns: []
-      execution_defaults: {timeout_ms: 600000, max_retries: 2}
-      observability:
-        require_trace_context: true
       sub_skills:
-        - id: "dummy1"
-          name: "Dummy 1"
-          description: "Dummy 1 description"
-          when: "triggered"
-          execution_policy:
-            idempotent: true
-            max_retries_override: 2
-            requires_idempotency_key: false
-            compensating_action_path: ""
-          required_inputs:
-            - {name: "trace_context", schema: {type: "object", additionalProperties: true}}
-          required_permissions: []
-          outputs: []
-          depends_on: []
-          input_bindings: []
-          context_reads: []
-          context_writes: []
-          side_effects: []
-          resources_touched: []
-          mutex_group: "dummy1"
-          sensitive_outputs: []
-          path: "sub_skills/dummy1.md"
+        - id: "dummy-01-intake"
+          name: "Intake"
+          description: "Intake phase."
+          path: "dummy-01-intake/dummy-01-intake.md"
+        - id: "dummy-02-extract"
+          name: "Extract"
+          description: "Extract phase."
+          path: "dummy-02-extract/dummy-02-extract.md"
+
     toolkit_router_skill_md: |
       ---
-      name: dummy-toolkit-router
-      description: Dummy router
+      name: dummy-toolkit
+      description: Domain toolkit for Intake and Extract
       ---
-      # Dummy Router
-      
-      ## Rules
-      1) Validate type checks
-toolkits_index_drafts: []
-pending_generation: []
-notes: |
-  Nothing to note.
+      # Dummy Toolkit
+      Domain specific routing.

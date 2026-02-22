@@ -22,7 +22,7 @@ schema_version: "2.2"
 - **高內聚優先 (Cohesion over Fragmentation)**：如果一組高度相關的技能（例如具有相同前綴或領域目的）總數在 30 個以內，應將其打包為單一 Toolkit。請勿為了硬湊數量而將其強行拆散。
 - 只有當整體技能庫跨度過大或總數過多時，才切分為 2–5 個 `<domain>-toolkit`。
 - 每 toolkit 子技能 ≤30；`misc-toolkit` ≤20。
-- 必須額外產出 **1 個 `root-router`（全域路由）**，用來分派至 toolkits 並支援跨 toolkit pipeline
+- 每個 `<domain>-toolkit` 必須包含一個 `SKILL.md` 檔案，作為該領域的路由進入點 (Routing Entry Point)。這個 YAML 內的 `description` 欄位至關重要，必須精準說明其包含之所有子技能的目的，以確保 Agent 能夠基於對話正確路由至該領域。
 
 ### 0.2 輸出格式與可驗證性
 - Step0–5 輸出皆為 **單一可解析 YAML**
@@ -41,7 +41,6 @@ schema_version: "2.2"
 ## 1) 硬性規則 (MUST)
 
 ### 1.1 檔案命名與 Bundle 保留原則 (MUST)
-- 全域 `root-router` 目錄 MUST 包含 `SKILL.md` 作為其 router。
 - 每個 toolkit 根目錄 (`<domain>-toolkit/`) MUST 包含 `SKILL.md` 作為其 router。
 - 不需要額外建立 `sub_skills/` 階層。子技能應直接以子資料夾形式放進 toolkit 目錄內（例如 `<domain>-toolkit/old_folder_name/`）。
 - **載入器防護機制**：子技能資料夾內的主檔案絕對「禁止」命名為 `SKILL.md` 或是其他保留名（如 `ROUTER.md`）。這是為了防止 Host 環境使用遞迴掃描 `glob("**/*.md")` 時，將子技能誤認為是 Router。請以目錄名稱作為主檔案名（例如 `my_skill/SKILL.md` 改名為 `my_skill/my_skill.md`）。
@@ -138,7 +137,7 @@ input_bindings:
 
 * `context_writes[]`: skill 將哪些 key 寫入 global_context（型別宣告）
 * `context_reads[]`: skill 依賴哪些 key（型別宣告）
-* Root Router 必須治理：缺 key → 問 1 題；或在 batch 模式下 fail-fast
+* Router 必須治理：缺 key → 問 1 題；或在 batch 模式下 fail-fast
 
 建議 key 命名：
 
@@ -148,7 +147,7 @@ input_bindings:
 
 ### 3.2 Artifact Registry（覆蓋率與可追溯）
 
-Root Router 應維護 artifact registry（宣告式）：
+編排管線的 Router 應維護 artifact registry（宣告式）：
 
 * 任何重要輸出（報告、變更單、部署摘要）應有 `artifact_id`
 * 便於稽核、重跑、對帳（coverage 也更易驗證）
@@ -177,16 +176,13 @@ input_inventory:
       confidence: "low"  # low|medium|high
 ```
 
-### Step 1：Domain Grouping（含 root-router）
+### Step 1：Domain Grouping
 
 ```yaml
 step: "1"
 schema_version: "2.2"
-target_toolkits_range: "5-12"
+target_toolkits_range: "2-5"
 actual_toolkits_count: 0
-root_router:
-  name: "root-router"
-  purpose: "global_intent_routing_and_cross_toolkit_pipelines"
 toolkits:
   - toolkit: "devops-toolkit"
     verbs: ["deploy","monitor"]
@@ -217,11 +213,10 @@ coverage_report:
   coverage_ratio: 1.0
 ```
 
-### Step 3：生成 Root Router + Toolkit Routers（YAML-safe）
+### Step 3：生成 Toolkit Routers（YAML-safe）
 
 **Token 截斷防護（toolkits > 3）**
 
-* 必須完整輸出：`root-router`（一定要完整，否則跨 toolkit 不可用）
 * toolkit：只完整輸出第 1 個 toolkit（index + router_md），其餘輸出 draft + `pending_generation[]`
 
 ````yaml
@@ -242,53 +237,6 @@ global_routing_spec:
   security:
     redaction_mode: "external_interceptor_preferred"   # inline_allowed | external_interceptor_preferred | external_only
     mask_value: "***MASKED***"
-
-root_router_generated:
-  root_router_index_yaml: |
-    schema_version: "2.2"
-    router: "root-router"
-    routing_mode: "deterministic_then_semantic"
-    semantic_confidence_threshold: 0.72
-    toolkits:
-      - {toolkit: "devops-toolkit",  description: "部署/監控/可用性/事故處理"}
-      - {toolkit: "infra-toolkit",   description: "資源佈建/網路/主機/權限"}
-      - {toolkit: "data-toolkit",    description: "查詢/彙整/報表/數據管線"}
-      - {toolkit: "misc-toolkit",    description: "不明確或長尾任務（≤20）"}
-    global_context_contract:
-      required_mode: "explicit_reads_writes"
-      forbidden_keys:
-        - "secrets.raw"  # 禁止明文 secret
-    observability:
-      require_trace_context: true
-    security:
-      requires_redaction: true
-      mask_value: "***MASKED***"
-      sensitive_scopes: ["logs","handoff","final_outputs"]
-      redaction_rules_declared:
-        key_name_contains: ["token","secret","password","apikey","authorization","cookie","session","key"]
-        value_patterns:
-          - {name: "jwt", regex: "eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"}
-          - {name: "pem_private_key", regex: "-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----"}
-          - {name: "aws_access_key_id", regex: "AKIA[0-9A-Z]{16}"}
-
-  root_router_skill_md: |
-    ---
-    name: root-router
-    description: |
-      全域路由：分派使用者意圖至對應 toolkit，並編排跨 toolkit pipeline（含 global_context、DAG、並行安全、冪等/重試、可觀測性與安全遮蔽宣告）。
-    ---
-    # Root Router（全域路由）
-
-    ## MUST：路由與編排
-    1) Intent Routing：先用 deterministic 規則命中 toolkit；否則 semantic（threshold 0.72）。
-    2) Cross-Toolkit Pipeline：若需要多 toolkit，建立全域 DAG，並用 global_context 顯式傳遞狀態。
-    3) Observability：所有子技能輸入/輸出必須攜帶 trace_context（trace_id/span_id）。
-    4) Security：宣告 requires_redaction，由 Host Interceptor 負責實際遮蔽（logs/handoff/final_outputs）。
-    5) Failure：輸出 failure_report + manual_cleanup_recommendations。
-
-    ## MUST：Cycle Resolution（含無人值守 fallback）
-    - 若偵測 cycle：先提出 1 題澄清（resolution_question）
-    - 若逾時未回覆：依 fallback_strategy 執行（fail_fast 或 break_lowest_confidence_edge）
 
 toolkits_generated:
   - toolkit: "devops-toolkit"
@@ -413,8 +361,6 @@ schema_version: "2.2"
 lint_report:
   coverage_ratio: 1.0
   uncovered_inputs: []
-  root_router_present_ok: true
-  global_master_router_count_ok: true
   toolkits_sub_skills_limit_ok: true
   misc_toolkit_limit_ok: true
   no_nested_master_ok: true

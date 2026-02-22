@@ -1,29 +1,30 @@
 step: "2"
 schema_version: "2.2"
 migration_mapping:
-  - old_path: "examples/inputs/dummy1.md"
-    new_path: "dummy-toolkit/sub_skills/dummy1.md"
-    new_skill_id: "dummy1"
-    rename_reason: ""
+  - old_path: "dummy-01-intake/SKILL.md"
+    new_path: "dummy-toolkit/dummy-01-intake/dummy-01-intake.md"
+    new_skill_id: "dummy-01-intake"
+    rename_reason: "Bundle preservation & Loader protection rule."
+    bundle_files_relocated:
+      - {from: "dummy-01-intake/prompt.txt", to: "dummy-toolkit/dummy-01-intake/prompt.txt"}
     coverage:
-      supersedes: ["examples/inputs/dummy1.md"]
+      supersedes: ["dummy-01-intake/SKILL.md"]
       split_into: []
-  - old_path: "examples/inputs/dummy2.md"
-    new_path: "dummy-toolkit/sub_skills/dummy2.md"
-    new_skill_id: "dummy2"
-    rename_reason: ""
+  - old_path: "dummy-02-extract/SKILL.md"
+    new_path: "dummy-toolkit/dummy-02-extract/dummy-02-extract.md"
+    new_skill_id: "dummy-02-extract"
+    rename_reason: "Bundle preservation & Loader protection rule."
+    shared_resources_relocated:
+      - {from: "shared-utils/schema.json", to: "dummy-toolkit/shared/shared-utils/schema.json"}
+    path_rewrites:
+      - file: "dummy-toolkit/dummy-02-extract/dummy-02-extract.md"
+        from: "../shared-utils/schema.json"
+        to: "../shared/shared-utils/schema.json"
     coverage:
-      supersedes: ["examples/inputs/dummy2.md"]
-      split_into: []
-  - old_path: "examples/inputs/dummy3.md"
-    new_path: "misc-toolkit/sub_skills/dummy3.md"
-    new_skill_id: "dummy3"
-    rename_reason: ""
-    coverage:
-      supersedes: ["examples/inputs/dummy3.md"]
+      supersedes: ["dummy-02-extract/SKILL.md"]
       split_into: []
 coverage_report:
-  total_input_skills: 3
-  total_mapped_input_skills: 3
+  total_input_skills: 2
+  total_mapped_input_skills: 2
   uncovered_inputs: []
   coverage_ratio: 1.0

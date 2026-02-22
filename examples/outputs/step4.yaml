@@ -1,6 +1,6 @@
 step: "4"
 schema_version: "2.2"
 test_cases:
-  - name: "Happy Path"
-    user_intent: "Do dummy 1"
-    expected: {toolkit: "dummy-toolkit", skill_id: "dummy1"}
+  - name: "Happy Path Toolkit"
+    user_intent: "Classify this issue"
+    expected: {toolkit: "dummy-toolkit", skill_id: "dummy-01-intake"}

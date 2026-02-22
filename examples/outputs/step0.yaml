@@ -1,25 +1,22 @@
 step: "0"
 schema_version: "2.2"
-warnings: []
+warnings:
+  - "Found relative paths to external shared folder '../shared-utils/' in dummy-02-extract/SKILL.md"
 auto_fixes: []
 input_inventory:
-  total_input_skills: 3
+  total_input_skills: 2
   input_skills:
-    - old_path: "examples/inputs/dummy1.md"
-      detected_name: "dummy_skill_1"
-      detected_description: "Does something simple."
+    - old_path: "dummy-01-intake/SKILL.md"
+      detected_name: "dummy-01-intake"
+      detected_description: "Intake phase. Parses issue descriptions and outputs structured task data."
       io_inferred: true
-      reserved_name_conflict: false
+      reserved_name_conflict: true
       confidence: "high"
-    - old_path: "examples/inputs/dummy2.md"
-      detected_name: "dummy_skill_2"
-      detected_description: "Another simple dummy."
+      bundle_files: ["dummy-01-intake/prompt.txt"]
+    - old_path: "dummy-02-extract/SKILL.md"
+      detected_name: "dummy-02-extract"
+      detected_description: "Extract specifications from the task using the shared schema."
       io_inferred: true
-      reserved_name_conflict: false
+      reserved_name_conflict: true
       confidence: "high"
-    - old_path: "examples/inputs/dummy3.md"
-      detected_name: "dummy_skill_3"
-      detected_description: "Third dummy."
-      io_inferred: true
-      reserved_name_conflict: false
-      confidence: "high"
+      shared_resources_referenced: ["../shared-utils/schema.json"]
